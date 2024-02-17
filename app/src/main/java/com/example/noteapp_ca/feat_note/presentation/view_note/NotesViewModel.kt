@@ -27,7 +27,15 @@ class NotesViewModel @Inject constructor(
 
     init {
         // Get all notes in default mode
-        noteUseCases.getNotes(NoteOrder.Date(OrderType.Descending))
+        getNotesJob?.cancel()// cancel any previous jobs
+        getNotesJob = noteUseCases.getNotes(NoteOrder.Date(OrderType.Descending))
+            .onEach { notes ->
+                _state.value = state.value.copy(
+                    notes = notes,
+                    noteOrder = NoteOrder.Date(OrderType.Descending)
+                )
+            }
+            .launchIn(viewModelScope)
     }
 
     fun onEvent(event: NotesEvent) {
